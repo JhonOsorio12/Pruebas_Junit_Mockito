@@ -3,6 +3,7 @@ package com.api.rest.controller;
 import com.api.rest.model.Empleado;
 import com.api.rest.service.EmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +24,11 @@ public class EmpleadoController {
     }
 
     @GetMapping
-    public List<Empleado> listatEmpleados(){
+    public List<Empleado> listarEmpleados(){
         return empleadoService.getAllEmpleados();
     }
 
-    @GetMapping
+    @GetMapping("/{id}")
     public ResponseEntity<Empleado> obtenerEmpleadoPorId(@PathVariable("id") long empleadoId){
         return empleadoService.getEmpleadoById(empleadoId)
                 .map(ResponseEntity::ok)
@@ -35,23 +36,22 @@ public class EmpleadoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Empleado> actualizarEmpleado(@PathVariable("id") long empleadoId, @RequestBody Empleado empleado){
+    public ResponseEntity<Empleado> actualizarEmpleado(@PathVariable("id") long empleadoId,@RequestBody Empleado empleado){
         return empleadoService.getEmpleadoById(empleadoId)
                 .map(empleadoGuardado -> {
                     empleadoGuardado.setNombre(empleado.getNombre());
                     empleadoGuardado.setApellido(empleado.getApellido());
                     empleadoGuardado.setEmail(empleado.getEmail());
 
-                    Empleado empleadoActualizado = empleadoService.saveEmpleado(empleadoGuardado);
+                    Empleado empleadoActualizado = empleadoService.updateEmpleado(empleadoGuardado);
                     return new ResponseEntity<>(empleadoActualizado,HttpStatus.OK);
                 })
-                .orElseGet(()->ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminarEmpleado(@PathVariable("id") long empleadoId){
         empleadoService.deleteEmpleado(empleadoId);
-        return new ResponseEntity<String>("Empleado eliminado exitosamente", HttpStatus.OK);
+        return new ResponseEntity<String>("Empleado eliminado exitosamente",HttpStatus.OK);
     }
-
 }
